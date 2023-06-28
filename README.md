@@ -6,7 +6,7 @@ It's a command-line tool that helps you organize all of your GitHub starred repo
 
 To use the program, follow the steps below:
 
-1. Open a terminal window.
+1. Open a terminal window and clone the repository.
 
 2. Ensure that you have Python 3.x and pip installed on your machine. You can check by running the following commands:
 
