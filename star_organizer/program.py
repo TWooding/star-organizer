@@ -3,12 +3,12 @@ import os
 import requests
 
 class StarOrganizer:
-    def __init__(self, token, sort_categories=True, sort_repos=True,include_private=False, output=None):
+    def __init__(self, token, sort_categories=True, sort_repos=True, include_private=False, output=None):
         self.token = token
         self.sort_categories = sort_categories
         self.sort_repos = sort_repos
         self.include_private = include_private
-        self.output = output if output else "README.md"
+        self.output = os.path.realpath(output) if output else "README.md"
 
     def run(self):
         # Initialize a list to store all starred repositories
@@ -49,6 +49,7 @@ class StarOrganizer:
         categories = {}
         for repo in starred_repos:
             language = repo["language"]
+
             if language:
                 # Normalize the language name to lowercase and remove leading/trailing whitespace
                 normalized_language = language.lower().strip()
@@ -56,18 +57,23 @@ class StarOrganizer:
                 # Check if this language has already been encountered
                 if normalized_language not in categories:
                     categories[normalized_language] = []
-                categories[normalized_language].append(repo["full_name"])
+
+                categories[normalized_language].append((repo["full_name"], repo["description"]))
 
         # Sort the categories by language name
         if self.sort_categories:
             sorted_categories = sorted(categories.items(), key=lambda x: x[0])
+
+        if os.path.isdir(self.output):
+            self.output = os.path.join(self.output,"README.md")
+
         # Create the directories if necessary
         dirname = os.path.dirname(self.output)
         if dirname and not os.path.exists(dirname):
             os.makedirs(dirname)
-
+            
         # Write the categorized list of starred repositories to a file
-        with open(self.output, "w") as f:
+        with open(self.output, "w",  encoding="utf-8") as f:
             # Write the Table of Contents
             f.write("# Table of Contents\n\n")
             for language, repos in sorted_categories:
@@ -85,7 +91,7 @@ class StarOrganizer:
                 else:
                     sorted_repos = repos
                 for repo in sorted_repos:
-                    f.write("- [{}]({})\n".format(repo, "https://github.com/" + repo))
+                    f.write("- [{}]({}) ({})\n".format(repo[0], "https://github.com/" + repo[0],repo[1]))
                 f.write("\n")
                 
 def main():
